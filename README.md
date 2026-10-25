@@ -59,4 +59,4 @@ Otherwise the browser blocks the script and the page stops working.
 
 ## License
 
-[MIT](LICENSE)
+Public domain, via [The Unlicense](LICENSE). Use it, change it, share it or sell it, for any reason, without asking or crediting anyone.
