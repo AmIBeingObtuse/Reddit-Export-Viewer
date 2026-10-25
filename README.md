@@ -24,6 +24,17 @@ One HTML file · no dependencies · no build step · nothing is uploaded
 - **Account data:** every file can be opened as a sortable, filterable table, including files the viewer doesn't specifically know about.
 - **Checksum verification** against the export's `checkfile.csv`.
 - **Search** across everything, plus a filter on every list.
+- **Mobile** The single html file also works on mobile such as Android and Brave Browser.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5dc86827-19d3-4175-b138-6cb996900166" alt="Reddit Export Viewer on mobile" width="240">
+  &nbsp;
+  <img src="https://github.com/user-attachments/assets/43b81b70-eaef-4e4c-bd97-9febda4850de" alt="Reddit Export Viewer on mobile" width="240">
+  &nbsp;
+  <img src="https://github.com/user-attachments/assets/5818ac20-9509-42c3-9fff-18e8d4974bef" alt="Reddit Export Viewer on mobile" width="240">
+</p>
+
+
 
 ## How to use
 
