@@ -3,7 +3,10 @@
 A tiny, single-file, offline viewer for your [Reddit data export](https://www.reddit.com/settings/data-request).
 Reddit gives you your data as a pile of `.csv` files. This turns them into a familiar Reddit-style site you can browse, search and explore.
 
-**Version 0.2** · one HTML file · no dependencies · no build step · nothing is uploaded
+One HTML file · no dependencies · no build step · nothing is uploaded
+
+> **Disclaimer**
+> For 100% transparency: I made this with [Claude Code](https://claude.com/claude-code). It is for personal use, but I have uploaded it here to share with the world (and off world) and anyone who wants to use it. I take no responsibility for its use, and you use it at your own risk.
 
 ## Features
 
