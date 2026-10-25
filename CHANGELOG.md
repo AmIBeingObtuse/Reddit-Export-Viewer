@@ -3,6 +3,7 @@
 ## 0.2
 
 ### Added
+- A disclaimer in the README, the code and the landing page: made with Claude Code, shared as-is, use at your own risk.
 - **Insights page:** account stats, activity by year, weekday-by-hour heat map, top communities, voting habits per community, writing stats, most-used words and emoji, post types and linked sites, conversations, saved items, awards and money, privacy footprint, and an overview of your data files.
 - Vote arrows on comments, showing how you voted.
 - A "Your votes on other people's comments here" section on post pages.
