@@ -1,0 +1,692 @@
+<!doctype html>
+<!--
+  Reddit Export Viewer
+  For 100% transparency: I made this with Claude Code. It is for personal use, but I have
+  uploaded it to share with the world (and off world) and anyone who wants to use it.
+  I take no responsibility for its use, and you use it at your own risk.
+  Public domain (The Unlicense).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<!-- script-src is pinned to the hash of the script below. After editing the script, run: python3 csp-hash.py reddit-viewer.html -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-px0I4rEypIYYEzbHT0qGvhynH5TRj7SjfS++EgREUt0='; style-src 'unsafe-inline'; img-src https: data:; base-uri 'none'; form-action 'none'">
+<title>Reddit Export Viewer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%23ff4500'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#dae0e6;--card:#fff;--line:#ccc;--text:#1c1c1c;--meta:#787c7e;--soft:#f6f7f8;--chip:#edeff1;--link:#0079d3;--acc:#ff4500;--up:#ff4500;--down:#7193ff;--c-up:#ff4500;--c-down:#5b74f0;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#030303;--card:#1a1a1b;--line:#343536;--text:#d7dadc;--meta:#818384;--soft:#272729;--chip:#343536;--link:#4fbcff;--c-down:#6a82f5;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#030303;--card:#1a1a1b;--line:#343536;--text:#d7dadc;--meta:#818384;--soft:#272729;--chip:#343536;--link:#4fbcff;--c-down:#6a82f5;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+button,input{font:inherit;color:inherit}button{cursor:pointer}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+header{position:sticky;top:0;z-index:9;height:48px;display:flex;align-items:center;gap:8px;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:8px;color:var(--text);font-weight:700;font-size:17px;white-space:nowrap}.logo:hover{text-decoration:none}
+.dot{width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;flex:none}.dot .i{width:18px;height:18px}
+.dot.big{width:64px;height:64px;margin:auto}.dot.big .i{width:34px;height:34px}
+#sf{flex:1;max-width:640px;margin:0 auto;position:relative}
+#q{width:100%;height:38px;border-radius:19px;border:1px solid var(--line);background:var(--soft);padding:0 16px 0 40px;outline:0}
+#q:focus{border-color:var(--link);background:var(--card)}
+#sf .i{position:absolute;left:12px;top:9px;color:var(--meta)}
+.tb{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;border-radius:17px;border:1px solid var(--line);background:none;white-space:nowrap;font-size:13px;font-weight:600}
+.tb:hover{background:var(--soft)}.tb.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.wrap{display:grid;grid-template-columns:210px minmax(0,1fr) 300px;gap:24px;max-width:1300px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:68px;align-self:start;display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - 88px);overflow:auto}
+nav a{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:4px;color:var(--text)}
+nav a:hover{background:var(--card);text-decoration:none}
+nav a.act{background:var(--card);font-weight:600;box-shadow:inset 3px 0 var(--acc)}
+nav a.zero{opacity:.45}nav a b{margin-left:auto;font-weight:400;font-size:12px;color:var(--meta)}
+nav h4,.box h4,.gh{margin:14px 12px 4px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--meta)}
+main{min-width:0}aside{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px}
+.list{display:flex;flex-direction:column;gap:10px}
+.post{display:flex;overflow:hidden}
+.post:hover,.cm:hover,.ref:hover,a.card:hover{border-color:var(--meta);text-decoration:none}
+.vote{width:40px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;background:var(--soft);color:var(--meta)}
+.up.on{color:var(--up)}.down.on{color:var(--down)}.up.on .i,.down.on .i{fill:currentColor}
+.cv{display:inline-flex;align-items:center;gap:2px;padding:0 6px 0 8px;color:var(--meta)}.cv .i{width:16px;height:16px}
+.pb{flex:1;min-width:0;padding:8px 12px 4px}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12px;color:var(--meta)}
+.meta a.sub,.me{color:var(--text);font-weight:700}
+.sav{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:9px;font-weight:800;flex:none;background:var(--acc)}
+.sav.md{width:36px;height:36px;font-size:12px}.sav.lg{width:72px;height:72px;font-size:24px;border:4px solid var(--card);margin-top:-22px}
+.tag{font-size:11px;padding:0 6px;border-radius:2px;background:var(--chip);color:var(--text);font-weight:600}
+.tag.nsfw{background:#ff585b;color:#fff}.tag.mod{background:#46d160;color:#fff}
+.post h3{margin:4px 0 6px;font-size:18px;font-weight:500;line-height:1.3;overflow-wrap:anywhere}.post h3 a{color:var(--text)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}.chip .i{width:14px;height:14px}
+.foot{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:2px -8px 0}
+.foot a,.foot button{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:2px;color:var(--meta);font-size:12px;font-weight:700;background:none;border:0}
+.foot a:hover,.foot button:hover{background:var(--soft);text-decoration:none}.foot .i{width:16px;height:16px}
+.md{overflow-wrap:anywhere}.md>:first-child{margin-top:0}.md>:last-child{margin-bottom:0}
+.md p{margin:0 0 .6em}
+.md blockquote{margin:.4em 0;padding:0 0 0 10px;border-left:4px solid var(--line);color:var(--meta)}
+.md pre{background:var(--soft);padding:8px;border-radius:4px;overflow:auto}
+.md code{font:12px ui-monospace,Menlo,Consolas,monospace;background:var(--soft);padding:1px 3px;border-radius:3px}.md pre code{padding:0}
+.md table{border-collapse:collapse;margin:.4em 0}.md th,.md td{border:1px solid var(--line);padding:4px 8px}
+.md ul,.md ol{margin:.3em 0 .6em;padding-left:24px}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{font-size:16px;margin:.6em 0 .3em}.md hr{border:0;border-top:1px solid var(--line)}
+.sp{background:var(--text);color:transparent;border-radius:2px;cursor:pointer}.sp.open{background:var(--chip);color:inherit}
+.clamp{max-height:240px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
+.smore,.lnk{border:0;background:none;color:var(--link);padding:2px 0;font-size:12px;font-weight:700}
+.media{display:block;max-width:100%;max-height:520px;margin:6px auto;border-radius:4px}.media.bad{display:none}
+.mbox{display:flex;align-items:center;gap:8px;width:100%;margin:6px 0;padding:12px;border:1px dashed var(--line);border-radius:4px;background:var(--soft);color:var(--meta);font-size:12px;text-align:left}
+.mbox:hover{border-color:var(--link);color:var(--link)}
+.cm{padding:8px 12px 4px}.cm>.md{margin-top:6px}
+.cmts{padding:12px 16px;margin-top:10px}.cn{margin-top:12px}.cn>.md{margin-top:4px}
+.thread{padding-left:14px;border-left:2px solid var(--line);margin-left:9px}
+.ref{display:flex;align-items:center;gap:10px;padding:8px 12px}.ref>div{min-width:0;flex:1}
+.ref .rt{display:block;color:var(--text);font-weight:500;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.snip{color:var(--meta);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv{color:var(--meta)}.xl{color:var(--meta)}
+.vl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.vl a{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 4px;border:1px solid var(--line);border-radius:12px;font-size:12px;color:var(--text)}.vl .i{width:16px;height:16px}
+.hd{padding:10px 16px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.hd h2{margin:0;font-size:18px;flex:1 1 auto}.hd h2 small{color:var(--meta);font-weight:400;font-size:13px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:none;border-radius:16px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--meta)}
+.pill.on{background:var(--chip);color:var(--text);border-color:var(--meta)}
+.flt{height:30px;border:1px solid var(--line);border-radius:4px;background:var(--soft);padding:0 10px;flex:1 1 140px;max-width:220px;min-width:0}
+.empty{padding:40px;text-align:center;color:var(--meta)}
+.note{font-size:12px;color:var(--meta)}
+.subhd{overflow:hidden;margin-bottom:10px}.bn{height:64px}
+.sh{display:flex;align-items:center;gap:12px;padding:0 16px 12px;flex-wrap:wrap}.sh h2{margin:6px 0 0;font-size:22px}.sh>div{flex:1}
+.prof{overflow:hidden;text-align:center;padding-bottom:12px}
+.pbn{height:56px;background:linear-gradient(120deg,var(--acc),#ff8717)}
+.pav{width:64px;height:64px;margin:-32px auto 4px;border-radius:50%;background:var(--card);border:4px solid var(--card);display:grid;place-items:center;font-size:26px;font-weight:800;color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
+.prof h3{margin:0 0 10px;font-size:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 4px;padding:0 12px;font-size:11px;color:var(--meta)}.stats a{color:var(--meta)}.stats b{display:block;font-size:15px;color:var(--text)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:12px 12px 0;padding-top:12px;border-top:1px solid var(--line);font-size:12px;text-align:left}
+.kv dt,.facts dt{color:var(--meta)}.kv dd,.facts dd{margin:0;text-align:right;overflow-wrap:anywhere}
+.box{padding:12px}.box h4{margin:0 0 8px}
+.srow{display:flex;align-items:center;gap:8px;padding:4px 0;color:var(--text)}.srow small{margin-left:auto;color:var(--meta)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.comm{display:flex;gap:10px;align-items:center;padding:10px 12px;color:var(--text)}.comm>div{min-width:0}
+.file,.thr{display:block;padding:10px 12px;color:var(--text)}.file b,.subj{display:block;overflow-wrap:anywhere}.subj{font-size:15px;margin:2px 0}
+.gh{margin:18px 4px 8px}
+.conv{padding:12px 16px;display:flex;flex-direction:column}
+.bub{align-self:flex-start;max-width:min(85%,560px);padding:8px 12px;border-radius:14px 14px 14px 4px;background:var(--soft);margin:4px 0}
+.bub.me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:var(--acc);color:#fff}.bub.me a,.bub.me .bm{color:#fff}
+.bm{font-size:11px;color:var(--meta);margin-bottom:2px}
+.tw{overflow:auto}
+.dt{border-collapse:collapse;width:100%;font-size:12px}
+.dt th{position:sticky;top:0;background:var(--soft);text-align:left;padding:6px 8px;cursor:pointer;white-space:nowrap;border-bottom:1px solid var(--line)}
+.dt td{padding:6px 8px;border-bottom:1px solid var(--line);max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top;cursor:default}
+.dt td.open{white-space:pre-wrap;overflow-wrap:anywhere}
+.mask{letter-spacing:2px;color:var(--meta)}
+.pad{display:block;margin:10px auto}
+/* insights */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.tile{padding:12px 14px}.tile small{display:block;color:var(--meta);font-size:12px}.tile b{display:block;font-size:24px;font-weight:600;line-height:1.25;margin:2px 0}
+.ins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ins .wide{grid-column:1/-1}
+.sec{padding:14px 16px;min-width:0}.sec h3{margin:0;font-size:15px}.sec>.note:first-of-type{margin:0 0 12px}
+.sec h5{margin:14px 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--meta)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:13px}.bl+.facts,.cx+.facts,.lg+.facts{margin-top:12px}
+.bl{display:grid;grid-template-columns:minmax(0,max-content) minmax(60px,1fr) auto;gap:6px 10px;align-items:center;font-size:12px}
+.bl .l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}.bl .v{color:var(--meta);text-align:right;font-variant-numeric:tabular-nums}
+.bt{height:16px;display:flex;align-items:center}.bt i{display:block;height:10px;background:var(--acc);border-radius:0 4px 4px 0;min-width:2px}
+.sb{display:flex;gap:2px;height:10px;width:100%}.sb i{display:block;height:100%;min-width:2px}.sb i:last-child{border-radius:0 4px 4px 0}
+.lg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:12px;color:var(--meta);margin:8px 0}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.cols{display:flex;align-items:flex-end;gap:2px;height:150px;border-bottom:1px solid var(--line)}
+.col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.col span{font-size:10px;color:var(--text);margin-bottom:2px;white-space:nowrap}.col i{display:block;width:100%;max-width:24px;background:var(--acc);border-radius:4px 4px 0 0;min-height:2px}
+.cx{display:flex;gap:2px;margin-top:4px}.cx span{flex:1;min-width:0;text-align:center;font-size:10px;color:var(--meta)}
+.hm{display:grid;grid-template-columns:30px repeat(24,minmax(0,1fr));gap:2px;font-size:10px;color:var(--meta);align-items:center}
+.hm i,.hmk{aspect-ratio:1;border-radius:2px;background:var(--soft)}
+.l1{background:rgba(255,69,0,.18)!important}.l2{background:rgba(255,69,0,.36)!important}.l3{background:rgba(255,69,0,.56)!important}.l4{background:rgba(255,69,0,.78)!important}.l5{background:#ff4500!important}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{background:var(--chip);border-radius:12px;padding:2px 10px;font-size:12px}.chips b{font-weight:600;color:var(--meta);margin-left:4px}
+#tip{position:fixed;z-index:20;pointer-events:none;background:var(--text);color:var(--card);font-size:12px;padding:4px 8px;border-radius:4px;max-width:280px}
+#land{min-height:100vh;display:grid;place-items:center;padding:16px}
+.drop{width:min(560px,100%);padding:40px 24px;text-align:center;border:2px dashed var(--line);border-radius:12px}
+.drop.over{border-color:var(--acc);background:var(--soft)}.drop h1{font-size:22px;margin:14px 0 6px}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px 0}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--acc);color:#fff;border:1px solid var(--acc);border-radius:20px;padding:9px 20px;font-weight:700;cursor:pointer}
+.btn.alt{background:none;color:var(--acc)}.err{color:#ff585b}
+@media (max-width:1100px){.wrap{grid-template-columns:200px minmax(0,1fr)}aside{display:none}}
+@media (max-width:720px){
+.wrap{display:block;padding:10px 16px 40px}
+nav{position:static;flex-direction:row;overflow-x:auto;gap:6px;margin:0 -16px 10px;padding:0 16px 4px;max-height:none}
+nav h4{display:none}nav a{flex:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 12px}nav a .i{width:16px;height:16px}
+nav a.act{box-shadow:none;border-color:var(--acc)}
+header{gap:6px;padding:0 10px}.logo>span+span,.tb span{display:none}.tb{padding:0 8px}
+.post h3{font-size:16px}.vote{width:32px}.hd{padding:10px 12px}
+.ins{grid-template-columns:minmax(0,1fr)}.bl .l{max-width:110px}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tile b{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div id="land">
+  <div class="card drop" id="drop">
+    <div class="dot big" data-i="box"></div>
+    <h1>Reddit Export Viewer</h1>
+    <p>Drop your Reddit data export here: the <b>.zip</b> or the unzipped <b>folder</b>.</p>
+    <div class="btns">
+      <label class="btn">Open folder<input type="file" id="fdir" webkitdirectory hidden></label>
+      <label class="btn alt">Open .zip or files<input type="file" id="fzip" accept=".zip,.csv" multiple hidden></label>
+    </div>
+    <p class="note">Nothing is uploaded. Files are read in this browser only, and the page makes no network requests unless you turn on remote media.</p>
+    <p class="note" id="lmsg"></p>
+    <p class="note" id="ver"></p>
+    <p class="note">Made with Claude Code for personal use and shared for anyone who wants it. No responsibility is taken for its use; use it at your own risk.</p>
+  </div>
+</div>
+<div id="app" hidden>
+  <header>
+    <a class="logo" href="#/"><span class="dot" data-i="box"></span><span>export viewer</span></a>
+    <form id="sf" role="search"><span data-i="search"></span><input id="q" type="search" placeholder="Search your Reddit data" aria-label="Search your Reddit data" autocomplete="off"></form>
+    <button class="tb" id="tmed" title="Load images from Reddit/Imgur" aria-label="Remote media"></button>
+    <button class="tb" id="tsen" title="Show IPs, email, phone and other identifiers" aria-label="Show private info"></button>
+    <button class="tb" id="tthe" title="Toggle dark mode" aria-label="Toggle dark mode" data-i="moon"></button>
+    <button class="tb" id="tcls" title="Close this export" aria-label="Close this export" data-i="x"></button>
+  </header>
+  <div class="wrap"><nav id="nav" aria-label="Sections"></nav><main id="main"></main><aside id="side"></aside></div>
+</div>
+<script>
+'use strict';
+const VERSION='0.2';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const enc=encodeURIComponent;
+const IC={home:'M3 11 12 3l9 8M5 9.5V21h14V9.5',chart:'M4 20V11M10 20V4M16 20v-7M21 20H3',post:'M6 3h8l5 5v13H6zM14 3v5h5M9 13h7M9 17h7',cmt:'M4 4h16v12H9l-5 4z',save:'M6 3h12v18l-6-4-6 4z',up:'M12 4 4 13h5v7h6v-7h5z',down:'M12 20 4 11h5V4h6v7h5z',hide:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 4l16 16',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',mail:'M3 5h18v14H3zM3 6l9 7 9-7',chat:'M4 4h16v12H8l-4 4zM8 10h.01M12 10h.01M16 10h.01',bell:'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',draft:'M4 20h4L20 8l-4-4L4 16zM14 6l4 4',clock:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 3',award:'M12 3a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM8.5 14 7 22l5-3 5 3-1.5-8',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',db:'M4 6c0-3 16-3 16 0v12c0 3-16 3-16 0zM4 6c0 3 16 3 16 0M4 12c0 3 16 3 16 0',search:'M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM15.5 15.5 21 21',moon:'M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z',img:'M3 5h18v14H3zM3 16l5-5 5 5 3-3 5 5M15 9h.01',ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',x:'M6 6l12 12M18 6 6 18',box:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
+const LS={get(k,d){try{const v=localStorage.getItem('rxv.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('rxv.'+k,JSON.stringify(v))}catch(e){}}};
+const O={media:LS.get('media',false)===true,sens:false};
+{const t=LS.get('theme',null);if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}
+$$('[data-i]').forEach(e=>e.insertAdjacentHTML('afterbegin',ic(e.dataset.i)));
+$('#ver').textContent='v'+VERSION;
+
+/* ---------- files: folder, loose CSVs or a .zip ---------- */
+const F=new Map(),TAB={},td=new TextDecoder();
+const MAXFILE=1.5e9;
+function addFile(path,size,read){const n=path.split('/').pop(),k=n.toLowerCase();if(k.endsWith('.csv')&&!F.has(k.slice(0,-4)))F.set(k.slice(0,-4),{name:n,size,read})}
+async function readZip(file){
+  const n=file.size,tl=Math.min(n,65557),tail=new DataView(await file.slice(n-tl).arrayBuffer());
+  let e=-1;for(let i=tl-22;i>=0;i--)if(tail.getUint32(i,true)===0x06054b50){e=i;break}
+  if(e<0)throw Error(file.name+' is not a valid zip file.');
+  const cnt=tail.getUint16(e+10,true),size=tail.getUint32(e+12,true),off=tail.getUint32(e+16,true);
+  if(off===0xFFFFFFFF||cnt===0xFFFF)throw Error('This zip uses ZIP64, which isn\'t supported. Unzip it and open the folder instead.');
+  if(off+size>n)throw Error(file.name+' looks truncated or damaged.');
+  const cd=new DataView(await file.slice(off,off+size).arrayBuffer()),dec=new TextDecoder();
+  for(let p=0,k=0;k<cnt&&p+46<=cd.byteLength&&cd.getUint32(p,true)===0x02014b50;k++){
+    const flag=cd.getUint16(p+8,true),m=cd.getUint16(p+10,true),cs=cd.getUint32(p+20,true),us=cd.getUint32(p+24,true),nl=cd.getUint16(p+28,true),lo=cd.getUint32(p+42,true);
+    if(p+46+nl>cd.byteLength)break;
+    const name=dec.decode(new Uint8Array(cd.buffer,p+46,nl));
+    p+=46+nl+cd.getUint16(p+30,true)+cd.getUint16(p+32,true);
+    if(name.endsWith('/')||/(^|\/)__MACOSX\//.test(name))continue;
+    addFile(name,us,async()=>{
+      if(flag&1)throw Error(name+' is encrypted.');
+      if(us>MAXFILE||cs>MAXFILE)throw Error(name+' is too large to open in a browser.');
+      const h=new DataView(await file.slice(lo,lo+30).arrayBuffer());
+      if(h.getUint32(0,true)!==0x04034b50)throw Error(name+' is damaged in the zip.');
+      const st=lo+30+h.getUint16(26,true)+h.getUint16(28,true),b=file.slice(st,st+cs);
+      if(m===0)return new Uint8Array(await b.arrayBuffer());
+      if(m!==8)throw Error(name+' uses an unsupported compression method.');
+      if(typeof DecompressionStream!='function')throw Error('This browser can\'t unzip files. Unzip the export and open the folder instead.');
+      return new Uint8Array(await new Response(b.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    });
+  }
+}
+async function dropped(dt){
+  const ents=[...dt.items].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean),files=[...dt.files],out=[];
+  if(!ents.length)return files;
+  const walk=async en=>{
+    if(en.isFile)out.push(await new Promise((r,j)=>en.file(r,j)));
+    else if(en.isDirectory){const rd=en.createReader();let b;do{b=await new Promise((r,j)=>rd.readEntries(r,j));for(const x of b)await walk(x)}while(b.length)}
+  };
+  for(const e of ents)await walk(e);
+  return out;
+}
+let busy=false;
+async function ingest(src){
+  if(busy)return;busy=true;
+  const st=$('#lmsg');st.classList.remove('err');
+  try{
+    for(const f of await src){const n=f.name.toLowerCase();
+      if(n.endsWith('.zip')){st.textContent='Reading '+f.name+'…';await readZip(f)}
+      else if(n.endsWith('.csv'))addFile(f.name,f.size,async()=>{if(f.size>MAXFILE)throw Error(f.name+' is too large to open in a browser.');return new Uint8Array(await f.arrayBuffer())})}
+    if(!F.size)throw Error('No .csv files found. Pick the export .zip or the unzipped export folder.');
+    st.textContent='Reading '+F.size+' files…';
+    await boot();
+  }catch(e){console.error(e);st.textContent=e.message;st.classList.add('err');F.clear();for(const k in TAB)delete TAB[k]}
+  busy=false;
+}
+
+/* ---------- CSV ---------- */
+function csv(s){
+  if(s.charCodeAt(0)===0xFEFF)s=s.slice(1);
+  const R=[],n=s.length;let row=[],i=0;
+  while(i<n){
+    let f;
+    if(s[i]==='"'){f='';i++;
+      for(;;){const j=s.indexOf('"',i);if(j<0){f+=s.slice(i);i=n;break}f+=s.slice(i,j);if(s[j+1]==='"'){f+='"';i=j+2}else{i=j+1;break}}
+      while(i<n&&s[i]!==','&&s[i]!=='\n'&&s[i]!=='\r')f+=s[i++];
+    }else{let j=i;for(;j<n;j++){const c=s.charCodeAt(j);if(c===44||c===10||c===13)break}f=s.slice(i,j);i=j}
+    row.push(f);
+    if(i>=n){R.push(row);break}
+    const c=s[i++];
+    if(c===','){if(i>=n){row.push('');R.push(row)}continue}
+    if(c==='\r'&&s[i]==='\n')i++;
+    R.push(row);row=[];
+  }
+  return R;
+}
+const tab=k=>TAB[k]??=(async()=>{const f=F.get(k);if(!f)return{h:[],a:[]};const a=csv(td.decode(await f.read())),h=(a.shift()||[]).map(x=>x.trim());return{h,a:a.filter(r=>r.length>1||r[0]!=='')}})();
+// null-prototype rows, so a column named "__proto__" can't touch Object.prototype
+const objs=t=>t.a.map(r=>{const o=Object.create(null);t.h.forEach((c,i)=>o[c]=r[i]??'');return o});
+
+/* ---------- helpers ---------- */
+const ENT={amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '};
+const dent=s=>s.replace(/&(?:#x([\da-f]+)|#(\d+)|(amp|lt|gt|quot|apos|nbsp));/gi,(m,h,d,n)=>{try{return n?ENT[n.toLowerCase()]:String.fromCodePoint(h?parseInt(h,16):+d)}catch(e){return m}});
+const pdate=s=>{s=String(s||'').trim();if(!s)return 0;let t=Date.parse(s.replace(/ UTC$/,'Z').replace(' ','T'));if(isNaN(t))t=Date.parse(s);if(isNaN(t)&&/^\d{9,13}(\.\d+)?$/.test(s))t=+s<1e11?s*1000:+s;return isNaN(t)?0:t};
+function pl(u){const m=/\/(r|u|user)\/([^/]+)\/comments\/([a-z0-9]+)(?:\/([^/?#]*))?(?:\/([a-z0-9]+))?/i.exec(u||'');if(!m)return{sub:'',pid:'',slug:'',cid:''};const s=m[4]=='comment'?'':m[4]||'';return{sub:m[1]=='r'?m[2]:'u_'+m[2],pid:m[3],slug:s,cid:m[5]||''}}
+const unslug=s=>{s=(s||'').replace(/_/g,' ').trim();try{s=decodeURIComponent(s)}catch(e){}return s?s[0].toUpperCase()+s.slice(1):''};
+const subName=s=>/^u_/i.test(s)?'u/'+s.slice(2):'r/'+s;
+const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
+const subIcon=(s,z='')=>`<span class="sav ${z}" style="background:hsl(${hue(s.toLowerCase())} 55% 45%)">${/^u_/i.test(s)?'u/':'r/'}</span>`;
+const subLink=s=>s?`<a class="sub" href="#/r/${enc(s)}">${esc(subName(s))}</a>`:'';
+// only http(s) and Reddit-relative paths ever become links
+const safe=u=>{u=String(u||'').trim();if(/^\/(r|u|user|message|comments|gallery)\//i.test(u))return'https://www.reddit.com'+u;return /^https?:\/\/[^\s]+$/i.test(u)?u:''};
+const host=u=>{try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return u}};
+const isImg=u=>!/\.gifv/i.test(u||'')&&/^https:\/\/((i|preview|external-preview)\.redd\.it|i\.imgur\.com)\/|^https:\/\/[^?#\s]+\.(png|jpe?g|gif|webp|avif)(\?|#|$)/i.test(u||'');
+const extA=(h,l='Open on Reddit')=>(h=safe(h))?`<a href="${esc(h)}" target="_blank" rel="noopener noreferrer">${ic('ext')}${l}</a>`:'';
+const kb=n=>n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
+const strip=s=>dent(String(s||'')).replace(/\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#>*_~`|\\^]+/g,' ').replace(/\s+/g,' ').trim();
+const plain=s=>strip(s).slice(0,220);
+const isMe=n=>!!n&&n.toLowerCase()===ME.toLowerCase();
+const SENSC=/^(ip|phone_number|subject_id|issuer_id|stripe_account_id|persona_inquiry_id|birthdate|transaction_id|payout_id|subscription_id|email.*)$/i,SENSK=/email|phone|ip.?addr|birth/i;
+const mask='<span class="mask">••••••</span>';
+function ago(t){const s=(Date.now()-t)/1e3;for(const[n,l]of[[31536e3,'yr'],[2592e3,'mo'],[86400,'day'],[3600,'hr'],[60,'min']])if(s>=n){const v=Math.floor(s/n);return v+' '+l+(v>1&&l=='day'?'s':'')+' ago'}return'just now'}
+const when=(t,raw)=>t?`<time title="${esc(new Date(t).toLocaleString())}">${t>Date.now()?esc(new Date(t).toLocaleString([],{dateStyle:'medium',timeStyle:'short'})):ago(t)}</time>`:esc(raw||'');
+const mbox=u=>O.media?`<img class="media" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(u)}" alt="">`:`<button class="mbox" data-src="${esc(u)}">${ic('img')}<span>Remote image hidden. Click to load it from <b>${esc(host(u))}</b>.</span></button>`;
+// your vote on an item; the export has no scores, only your own up/down
+const VTIP={up:'You upvoted this',down:'You downvoted this'};
+const arrows=(v,cls)=>`<span class="${cls}" title="${VTIP[v]||'You didn\'t vote on this'} (Reddit's export doesn't include scores)"><span class="up${v=='up'?' on':''}">${ic('up')}</span><span class="down${v=='down'?' on':''}">${ic('down')}</span></span>`;
+
+/* ---------- markdown (escape first, small subset) ---------- */
+let IMG=[];
+function md(src,clamp,extra){
+  IMG=[];const B=[];
+  let s=dent(dent(String(src||''))).replace(/\r\n?/g,'\n').replace(/^ {0,3}```[^\n]*\n([\s\S]*?)\n {0,3}```[ \t]*$/gm,(_,c)=>'\u0002'+(B.push('<pre><code>'+esc(c)+'</code></pre>')-1)+'\u0003');
+  const h=blocks(s).replace(/\u0002(\d+)\u0003/g,(_,i)=>B[i]);
+  if(extra)for(const u of String(extra).match(/https?:\/\/[^\s"',\]}]+/g)||[])if(isImg(u))IMG.push(u);
+  const long=clamp&&(s.length>900||s.split('\n').length>14),im=[...new Set(IMG)].slice(0,4).map(u=>mbox(u)).join('');
+  return(h?`<div class="md${long?' clamp':''}">${h}</div>${long?'<button class="smore">Show more</button>':''}`:'')+im;
+}
+function blocks(s){
+  let out='';
+  for(const b of s.split(/\n[ \t]*\n+/)){
+    if(!b.replace(/[\s​]/g,''))continue;
+    const t=b.trim(),L=b.split('\n');let m;
+    if(/^\u0002\d+\u0003$/.test(t))out+=t;
+    else if(/^ {0,3}>(?!!)/.test(L[0]))out+='<blockquote>'+blocks(L.map(l=>l.replace(/^ {0,3}> ?/,'')).join('\n'))+'</blockquote>';
+    else if(L.every(l=>/^( {4}|\t)/.test(l)))out+='<pre><code>'+esc(L.map(l=>l.replace(/^( {4}|\t)/,'')).join('\n'))+'</code></pre>';
+    else if(/^([-*_])( *\1){2,}$/.test(t))out+='<hr>';
+    else if((m=/^ {0,3}(#{1,6})\s+(.*?)[\s#]*$/.exec(L[0]))&&m[2]){out+=`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`;if(L.length>1)out+=blocks(L.slice(1).join('\n'))}
+    else if(/^\s*([*+-]|\d+[.)])\s+/.test(L[0])){
+      const o=/^\s*\d/.test(L[0])?'ol':'ul',it=[];
+      for(const l of L){const x=/^\s*(?:[*+-]|\d+[.)])\s+(.*)/.exec(l);if(x)it.push(x[1]);else if(it.length)it[it.length-1]+='\n'+l.trim()}
+      out+=`<${o}>${it.map(x=>'<li>'+x.split('\n').map(inl).join('<br>')+'</li>').join('')}</${o}>`;
+    }else if(L.length>1&&L[0].includes('|')&&/^[\s|:-]+$/.test(L[1])&&L[1].includes('-')){
+      const cl=l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>inl(c.trim()));
+      out+='<div class="tw"><table><tr>'+cl(L[0]).map(c=>'<th>'+c+'</th>').join('')+'</tr>'+L.slice(2).map(r=>'<tr>'+cl(r).map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table></div>';
+    }else out+='<p>'+L.map(l=>inl(l.trim())).join('<br>')+'</p>';
+  }
+  return out;
+}
+function lnk(u,x){const h=safe(/^www\./i.test(u)?'https://'+u:u.replace(/\\(?=[^\w\s])/g,''));x=x.replace(/\\(?=[^\w\s])/g,'');if(!h)return esc(x);if(isImg(h))IMG.push(h);return`<a href="${esc(h)}" target="_blank" rel="noopener noreferrer">${esc(x)}</a>`}
+function inl(t){
+  const K=[],k=h=>'\u0000'+(K.push(h)-1)+'\u0001';
+  t=t.replace(/[\u0000\u0001]/g,'')
+   .replace(/(`+)([^`]+?)\1/g,(_,q,c)=>k('<code>'+esc(c)+'</code>'))
+   .replace(/\[([^\]]*)\]\(\s*<?([^\s()>]+(?:\([^\s()]*\)[^\s()>]*)*)>?(?:\s+"[^"]*")?\s*\)/g,(_,x,u)=>k(lnk(u,x)))
+   .replace(/(^|[\s(>"'])((?:https?:\/\/|www\.)[^\s<>"]+)/gi,(_,p,u)=>{let e='';const m=/[.,;:!?'")\]*]+$/.exec(u);if(m&&!(m[0]==')'&&u.includes('('))){e=m[0];u=u.slice(0,-e.length)}return p+k(lnk(u,u))+e})
+   .replace(/(^|[^\w/])(\/?)(r|u)\/([A-Za-z0-9_-]{2,21})\b/g,(_,p,s,r,n)=>p+k(r=='r'?`<a href="#/r/${enc(n)}">${s}r/${esc(n)}</a>`:lnk('https://www.reddit.com/user/'+n,s+'u/'+n)))
+   .replace(/\\([\\`*_{}[\]()#+\-.!>~^|<])/g,(_,c)=>k(esc(c)));
+  t=esc(t)
+   .replace(/\*\*\*(?=\S)(.+?)\*\*\*/g,'<b><i>$1</i></b>')
+   .replace(/\*\*(?=\S)(.+?)\*\*|__(?=\S)(.+?)__/g,(_,a,b)=>'<b>'+(a||b)+'</b>')
+   .replace(/(^|[^*\w])\*(?=\S)(.+?)\*(?!\w)/g,'$1<i>$2</i>')
+   .replace(/(^|[^_\w])_(?=\S)(.+?)_(?!\w)/g,'$1<i>$2</i>')
+   .replace(/~~(.+?)~~/g,'<s>$1</s>')
+   .replace(/&#62;!(.+?)!&#60;/g,'<span class="sp">$1</span>')
+   .replace(/\^\(([^)]+)\)|\^([^\s^]+)/g,(_,a,b)=>'<sup>'+(a||b)+'</sup>');
+  for(let i=0;i<4&&t.includes('\u0000');i++)t=t.replace(/\u0000(\d+)\u0001/g,(_,i)=>K[i]);
+  return t;
+}
+
+/* ---------- model ---------- */
+const CORE=['posts','post_headers','comments','comment_headers','post_votes','comment_votes','saved_posts','saved_comments','hidden_posts','messages_archive','messages_archive_headers','chat_history','announcements','drafts','scheduled_posts','subscribed_subreddits','moderated_subreddits','approved_submitter_subreddits','multireddits','gilded_content','gold_received','statistics'];
+let ME='you',STAT=[],P=[],C=[],UP=[],DN=[],SV=[],HID=[],MS=[],THR=[],CHAT=[],ANN=[],DR=[],SCH=[],AW=[],MULTI=[];
+const PID=new Map(),CID=new Map(),BYP=new Map(),VOTE=new Map(),CVP=new Map(),SAVE=new Set(),SUBS=new Map();
+const push=(m,k,v)=>{(m.get(k)||m.set(k,[]).get(k)).push(v)};
+const bool=v=>/^(true|1|yes)$/i.test(v||'');
+async function boot(){
+  const T={};
+  await Promise.all(CORE.map(async k=>{try{T[k]=objs(await tab(k))}catch(e){console.warn(k,e);T[k]=[]}}));
+  STAT=T.statistics.map(r=>[r.statistic,r.value]).filter(r=>r[0]);
+  P=(T.posts.length?T.posts:T.post_headers).map(r=>{const l=pl(r.permalink);return{k:'post',id:r.id,sub:r.subreddit||l.sub,ts:pdate(r.date),d:r.date,title:r.title||unslug(l.slug)||'(untitled)',url:r.url||'',body:r.body||'',gild:+r.gildings||0,ip:r.ip,href:r.permalink}});
+  P.forEach(p=>PID.set(p.id,p));
+  C=(T.comments.length?T.comments:T.comment_headers).map(r=>{const l=pl(r.permalink),k=pl(r.link),pid=k.pid||l.pid,pr=(r.parent||'').trim(),par=pr.replace(/^t\d_/,'');return{k:'cmt',id:r.id||l.cid,sub:r.subreddit||l.sub,ts:pdate(r.date),d:r.date,body:r.body||'',pid,slug:k.slug||l.slug,link:r.link,parent:/^t3_/.test(pr)||par==pid?'':par,media:r.media||'',gild:(+r.gildings||0)+(+r.gildings_silver||0)+(+r.gildings_supergold||0),ip:r.ip,href:r.permalink}});
+  C.forEach(c=>{CID.set(c.id,c);push(BYP,c.pid,c)});
+  const ref=(r,kind)=>{const l=pl(r.permalink);return{k:'ref',kind,id:r.id||l.cid,dir:r.direction||'',href:r.permalink,sub:l.sub,pid:kind=='post'?r.id||l.pid:l.pid,slug:l.slug}};
+  for(const[f,kind]of[['post_votes','post'],['comment_votes','comment']])for(const r of T[f]){const v=ref(r,kind);VOTE.set(kind[0]+v.id,v.dir);if(v.dir=='up')UP.push(v);else if(v.dir=='down')DN.push(v);else continue;if(kind=='comment')push(CVP,v.pid,v)}
+  SV=[...T.saved_posts.map(r=>ref(r,'post')),...T.saved_comments.map(r=>ref(r,'comment'))];SV.forEach(x=>SAVE.add(x.kind[0]+x.id));
+  HID=T.hidden_posts.map(r=>ref(r,'post'));
+  MS=(T.messages_archive.length?T.messages_archive:T.messages_archive_headers).map(r=>({k:'msg',id:r.id,th:r.thread_id||r.id,ts:pdate(r.date),d:r.date,from:r.from,to:r.to,subject:r.subject||'',body:r.body||'',href:r.permalink}));
+  const sn=STAT.find(([k])=>/account.?name|user.?name/i.test(k)),pu=P.find(p=>/^u_/i.test(p.sub));
+  if(sn&&sn[1])ME=sn[1];else if(pu)ME=pu.sub.slice(2);else{const n={};MS.forEach(m=>{n[m.from]=(n[m.from]||0)+1;n[m.to]=(n[m.to]||0)+1});const b=Object.entries(n).sort((a,b)=>b[1]-a[1])[0];if(b)ME=b[0]}
+  const g=new Map();MS.forEach(m=>push(g,m.th,m));
+  THR=[...g].map(([id,ms])=>{ms.sort((a,b)=>a.ts-b.ts);const w=[...new Set(ms.flatMap(m=>[m.from,m.to]).filter(x=>x&&!isMe(x)))];return{k:'thr',id,msgs:ms,ts:ms[ms.length-1].ts,subject:(ms.find(m=>m.subject)||{}).subject||'(no subject)',who:w.join(', ')||ME}});
+  const ch=new Map();T.chat_history.forEach(r=>push(ch,r.channel_url||r.channel_name,{ts:pdate(r.created_at),d:r.created_at,from:r.username,body:r.message||''}));
+  const cm=new Map(T.chat_history.map(r=>[r.channel_url||r.channel_name,r]));
+  CHAT=[...ch].map(([id,ms])=>{ms.sort((a,b)=>a.ts-b.ts);const r=cm.get(id),w=[...new Set(ms.map(m=>m.from).filter(x=>x&&!isMe(x)))];return{k:'chan',id,msgs:ms,ts:ms[ms.length-1].ts,name:r.channel_name||(r.subreddit&&'r/'+r.subreddit)||w.join(', ')||'Chat',type:r.conversation_type||'',who:w.join(', ')}});
+  ANN=T.announcements.map(r=>({k:'ann',ts:pdate(r.sent_at),d:r.sent_at,from:r.from_username,subject:r.subject||'',body:r.body||'',url:r.url,read:r.read_at}));
+  DR=T.drafts.map(r=>({k:'draft',id:r.id,title:r.title||'',body:r.body||'',sub:r.subreddit||'',ts:pdate(r.created),d:r.created,nsfw:bool(r.nsfw),spoiler:bool(r.spoiler),flair:r.flair_text}));
+  SCH=T.scheduled_posts.map(r=>({k:'sched',id:r.scheduled_post_id,title:r.title||'',body:r.body||'',url:r.url||'',sub:r.subreddit||'',ts:pdate(r.submission_time),d:r.submission_time,rec:r.recurrence}));
+  AW=[...T.gilded_content.map(r=>({k:'aw',got:0,href:r.content_link,award:r.award,amount:r.amount,ts:pdate(r.date),d:r.date})),...T.gold_received.map(r=>({k:'aw',got:1,href:r.content_link,award:'Gold',amount:r.gold_received,from:r.gilder_username,ts:pdate(r.date),d:r.date}))];
+  MULTI=T.multireddits.map(r=>({name:r.display_name,subs:(r.subreddits||'').split(/[\s,+]+/).filter(Boolean),desc:r.description,privacy:r.privacy,followers:r.followers}));
+  const S=n=>{const k=n.toLowerCase();return SUBS.get(k)||SUBS.set(k,{name:n,sub:0,mod:0,ok:0,posts:0,cmts:0,up:0,down:0}).get(k)};
+  T.subscribed_subreddits.forEach(r=>r.subreddit&&(S(r.subreddit).sub=1));
+  T.moderated_subreddits.forEach(r=>r.subreddit&&(S(r.subreddit).mod=1));
+  T.approved_submitter_subreddits.forEach(r=>r.subreddit&&(S(r.subreddit).ok=1));
+  P.forEach(p=>p.sub&&S(p.sub).posts++);C.forEach(c=>c.sub&&S(c.sub).cmts++);UP.forEach(v=>v.sub&&S(v.sub).up++);DN.forEach(v=>v.sub&&S(v.sub).down++);
+  $('#land').hidden=true;$('#app').hidden=false;
+  toggles();renderNav();renderSide();addEventListener('hashchange',route);route();
+}
+
+/* ---------- cards ---------- */
+function postCard(p,full){
+  const v=VOTE.get('p'+p.id),n=(BYP.get(p.id)||[]).length,own=p.k=='post',self=!p.url||p.url[0]=='/'||/\/comments\//.test(p.url),u=safe(p.url);
+  const tags=(p.k=='draft'?'<span class="tag">Draft</span>':'')+(p.k=='sched'?`<span class="tag">Scheduled${p.rec?' · '+esc(p.rec):''}</span>`:'')+(p.nsfw?'<span class="tag nsfw">NSFW</span>':'')+(p.spoiler?'<span class="tag">Spoiler</span>':'')+(p.flair?`<span class="tag">${esc(p.flair)}</span>`:'')+(own&&SAVE.has('p'+p.id)?'<span class="tag">Saved</span>':'')+(p.gild?`<span class="tag">🏆 ${p.gild}</span>`:'')+(O.sens&&p.ip?`<span class="tag">IP ${esc(p.ip)}</span>`:'');
+  const t=own&&!full?`<a href="#/post/${enc(p.id)}">${esc(p.title)}</a>`:esc(p.title||'(untitled)');
+  return`<article class="card post">${arrows(v,'vote')}<div class="pb">`+
+  `<div class="meta">${p.sub?subIcon(p.sub)+subLink(p.sub)+'<span>•</span>':''}${p.k=='stub'?'':`<span>Posted by u/${esc(ME)}</span><span>•</span>`}${when(p.ts,p.d)}${tags}</div><h3>${t}</h3>`+
+  (!self&&u?`<a class="chip" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${ic('ext')}${esc(u.replace(/^https?:\/\/(www\.)?/,'').slice(0,70))}</a>`:'')+
+  (!self&&u&&isImg(u)?mbox(u):'')+(p.k=='stub'?'<p class="note">This post isn\'t yours, so its text isn\'t in your export. Below are your comments and votes on it.</p>':md(p.body,!full))+
+  `<div class="foot">${own&&!full?`<a href="#/post/${enc(p.id)}">${ic('cmt')}${n} comment${n==1?'':'s'} by you</a>`:''}${extA(p.href)}</div></div></article>`;
+}
+function cmtCard(c){
+  const p=PID.get(c.pid),t=p?p.title:unslug(c.slug)||'a post';
+  return`<article class="card cm"><div class="meta">${ic('cmt')}<span class="me">u/${esc(ME)}</span> commented on <a href="#/post/${enc(c.pid)}">${esc(t)}</a><span>•</span>${c.sub?subLink(c.sub)+'<span>•</span>':''}${when(c.ts,c.d)}${c.gild?`<span class="tag">🏆 ${c.gild}</span>`:''}${SAVE.has('c'+c.id)?'<span class="tag">Saved</span>':''}${O.sens&&c.ip?`<span class="tag">IP ${esc(c.ip)}</span>`:''}</div>${md(c.body,1,c.media)}<div class="foot">${arrows(VOTE.get('c'+c.id),'cv')}<a href="#/post/${enc(c.pid)}">${ic('cmt')}View thread</a>${extA(c.href)}</div></article>`;
+}
+function refCard(x){
+  const p=PID.get(x.pid),c=x.kind=='comment'?CID.get(x.id):null,t=p?p.title:unslug(x.slug)||'Post '+x.pid,inn=PID.has(x.pid)||BYP.has(x.pid),d=x.dir=='up'||x.dir=='down'?x.dir:'',h=inn?'#/post/'+enc(x.pid):esc(safe(x.href));
+  return`<article class="card ref"><span class="rv ${d?d+' on':''}">${ic(d||(x.kind=='comment'?'cmt':'post'))}</span><div><div class="meta">${x.sub?subIcon(x.sub)+subLink(x.sub)+'<span>•</span>':''}<span>${x.kind=='comment'?'Comment':'Post'}</span>${(p&&x.kind=='post')||c?'<span class="tag">yours</span>':''}</div><a class="rt" href="${h}"${inn?'':' target="_blank" rel="noopener noreferrer"'}>${x.kind=='comment'?'<span class="note">on</span> ':''}${esc(t)}</a>${c?`<div class="snip">${esc(plain(c.body))}</div>`:''}</div>${inn?`<a class="xl" href="${esc(safe(x.href))}" target="_blank" rel="noopener noreferrer" title="Open on Reddit">${ic('ext')}</a>`:''}</article>`;
+}
+const thrCard=t=>`<a class="card thr" href="#/msg/${enc(t.id)}"><div class="meta">${ic('mail')}<span>with <b>${esc(t.who)}</b></span><span>•</span><span>${t.msgs.length} message${t.msgs.length==1?'':'s'}</span><span>•</span>${when(t.ts)}</div><span class="subj">${esc(t.subject)}</span><div class="snip">${esc(plain(t.msgs[t.msgs.length-1].body))}</div></a>`;
+const chanCard=c=>`<a class="card thr" href="#/chat/${enc(c.id)}"><div class="meta">${ic('chat')}${c.type?`<span class="tag">${esc(c.type)}</span>`:''}<span>${c.msgs.length} messages</span><span>•</span>${when(c.ts)}</div><span class="subj">${esc(c.name)}</span><div class="snip">${esc(c.msgs[c.msgs.length-1].from)}: ${esc(plain(c.msgs[c.msgs.length-1].body))}</div></a>`;
+const msgCard=m=>`<a class="card thr" href="#/msg/${enc(m.th)}"><div class="meta">${ic('mail')}<b>${esc(m.from)}</b> → ${esc(m.to)}<span>•</span>${when(m.ts,m.d)}</div><span class="subj">${esc(m.subject||'(no subject)')}</span><div class="snip">${esc(plain(m.body))}</div></a>`;
+const annCard=a=>`<article class="card cm"><div class="meta">${ic('bell')}<b>${esc(a.from||'Reddit')}</b><span>•</span>${when(a.ts,a.d)}${a.read?'':'<span class="tag">Unread</span>'}</div><h3 class="subj">${esc(a.subject)}</h3>${md(a.body,1)}<div class="foot">${extA(a.url,'Open link')}</div></article>`;
+function awCard(a){
+  const l=pl(a.href),p=PID.get(l.pid),c=l.cid&&CID.get(l.cid),t=p?p.title:unslug(l.slug)||a.href,inn=PID.has(l.pid)||BYP.has(l.pid);
+  return`<article class="card ref"><span class="rv">${ic('award')}</span><div><div class="meta">${l.sub?subLink(l.sub)+'<span>•</span>':''}<b>${a.got?'Received':'Gave'} ${esc(a.award||'award')}</b>${a.amount?`<span class="tag">${esc(a.amount)}</span>`:''}${a.from?`<span>from u/${esc(a.from)}</span>`:''}<span>•</span>${when(a.ts,a.d)}</div><a class="rt" href="${inn?'#/post/'+enc(l.pid):esc(safe(a.href))}"${inn?'':' target="_blank" rel="noopener noreferrer"'}>${l.cid?'<span class="note">comment on</span> ':''}${esc(t)}</a>${c?`<div class="snip">${esc(plain(c.body))}</div>`:''}</div></article>`;
+}
+const CARD={post:postCard,draft:postCard,sched:postCard,cmt:cmtCard,ref:refCard,thr:thrCard,chan:chanCard,msg:msgCard,ann:annCard,aw:awCard};
+const card=x=>CARD[x.k]?CARD[x.k](x):'';
+const hay=x=>x._h??=[x.title,x.body,x.sub,x.subject,x.from,x.to,x.who,x.name,x.url,x.award,x.slug&&unslug(x.slug),x.k=='ref'&&PID.get(x.pid)?.title,x.msgs&&x.msgs.map(m=>m.from+' '+m.body).join(' ')].filter(Boolean).join(' ').toLowerCase();
+
+/* ---------- infinite feed ---------- */
+let io;
+function feed(box,items,render,empty,y){
+  io&&io.disconnect();box.innerHTML='';
+  if(!items.length){box.innerHTML=`<div class="card empty">${empty||'Nothing here.'}</div>`;return}
+  const list=document.createElement('div'),s=document.createElement('div');list.className='list';box.append(list,s);
+  let i=0;
+  const more=()=>{let h='';const e=Math.min(i+40,items.length);while(i<e)h+=render(items[i++]);list.insertAdjacentHTML('beforeend',h);if(i>=items.length){io.disconnect();s.remove()}};
+  const fill=()=>{while(i<items.length&&s.getBoundingClientRect().top<innerHeight+1500)more()};
+  io=new IntersectionObserver(e=>{if(e[0].isIntersecting)fill()});
+  more();while(i<items.length&&list.offsetTop+list.offsetHeight<(y||0)+innerHeight)more();
+  if(i<items.length)io.observe(s);
+}
+
+/* ---------- views ---------- */
+const main=$('#main');
+let RT=0,cur='',HOPS=0;const POS={};
+function list(o){
+  const st={sort:'new',kind:0,f:o.q||''},K=o.kinds;
+  main.innerHTML=(o.top||'')+`<div class="card hd"><h2>${esc(o.title)} <small></small></h2>`+
+    (K?`<div class="tabs">${K.map((k,i)=>`<button class="pill${i?'':' on'}" data-k="${i}">${k[0]} <span></span></button>`).join('')}</div>`:'')+
+    (o.dated!==false?'<div class="tabs"><button class="pill on" data-s="new">New</button><button class="pill" data-s="old">Old</button></div>':'')+
+    `<input class="flt" type="search" placeholder="Filter…" aria-label="Filter" value="${esc(st.f)}"></div><div id="feed"></div>`;
+  const hd=$('.hd',main);
+  const draw=y=>{
+    let a=o.items;
+    const f=st.f.toLowerCase().split(/\s+/).filter(Boolean);if(f.length)a=a.filter(x=>{const h=hay(x);return f.every(w=>h.includes(w))});
+    if(K){$$('[data-k] span',hd).forEach((e,i)=>e.textContent=a.filter(K[i][1]).length.toLocaleString());a=a.filter(K[st.kind][1])}
+    if(o.dated!==false)a=a.slice().sort((x,y)=>st.sort=='new'?y.ts-x.ts:x.ts-y.ts);
+    $('small',hd).textContent=a.length.toLocaleString();
+    feed($('#feed'),a,o.render||card,f.length?'No matches.':o.empty,y);
+  };
+  hd.addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;const g=b.parentNode;$$('.pill',g).forEach(x=>x.classList.toggle('on',x==b));if(b.dataset.k)st.kind=+b.dataset.k;else st.sort=b.dataset.s;draw()});
+  let tm;$('.flt',hd).addEventListener('input',e=>{clearTimeout(tm);tm=setTimeout(()=>{st.f=e.target.value;draw()},150)});
+  draw(POS[cur]);
+}
+const K_PC=[['All',()=>1],['Posts',x=>x.k=='post'],['Comments',x=>x.k=='cmt']];
+const K_REF=[['All',()=>1],['Posts',x=>x.kind=='post'],['Comments',x=>x.kind=='comment']];
+function subView(n){
+  const lc=n.toLowerCase(),m=x=>(x.sub||'').toLowerCase()==lc,S=SUBS.get(lc)||{name:n},u=/^u_/i.test(n);
+  list({title:'Your activity',items:[...P.filter(m),...C.filter(m),...UP.filter(m),...DN.filter(m),...SV.filter(m)],
+    kinds:[['Posts & comments',x=>x.k!='ref'],['Posts',x=>x.k=='post'],['Comments',x=>x.k=='cmt'],['Upvoted',x=>x.dir=='up'],['Downvoted',x=>x.dir=='down'],['Saved',x=>x.k=='ref'&&!x.dir]],
+    top:`<div class="card subhd"><div class="bn" style="background:hsl(${hue(lc)} 55% 45%)"></div><div class="sh">${subIcon(n,'lg')}<div><h2>${esc(subName(S.name))}</h2><div class="meta">${S.sub?'<span class="tag">Joined</span>':''}${S.mod?'<span class="tag mod">Moderator</span>':''}${S.ok?'<span class="tag">Approved submitter</span>':''}</div></div><div class="foot">${extA('https://www.reddit.com/'+(u?'user/'+enc(n.slice(2)):'r/'+enc(n))+'/')}</div></div></div>`});
+}
+function postView(id){
+  const p=PID.get(id),cs=(BYP.get(id)||[]).slice().sort((a,b)=>a.ts-b.ts),vs=(CVP.get(id)||[]).filter(v=>!CID.has(v.id));
+  if(!p&&!cs.length&&!vs.length)return notFound();
+  const c0=cs[0]||vs[0],ids=new Set(cs.map(c=>c.id)),kids=new Map(),roots=[];
+  for(const c of cs)c.parent&&c.parent!=c.id&&ids.has(c.parent)?push(kids,c.parent,c):roots.push(c);
+  const node=c=>`<div class="cn"><div class="meta">${subIcon('u_'+ME)}<span class="me">u/${esc(ME)}</span><span>•</span>${when(c.ts,c.d)}${c.gild?`<span class="tag">🏆 ${c.gild}</span>`:''}${c.parent&&!ids.has(c.parent)?'<span class="tag">reply</span>':''}</div>${md(c.body,0,c.media)}<div class="foot">${arrows(VOTE.get('c'+c.id),'cv')}${extA(c.href,'Permalink')}</div>${kids.has(c.id)?'<div class="thread">'+kids.get(c.id).map(node).join('')+'</div>':''}</div>`;
+  main.innerHTML=`<div class="hd" style="padding:0"><button class="lnk" data-back>← Back</button></div>`+
+    postCard(p||{k:'stub',id,sub:c0.sub,title:unslug(c0.slug)||'Post '+id,href:c0.link||c0.href||'https://www.reddit.com/comments/'+id,ts:0},1)+
+    `<div class="card cmts"><div class="meta">Your comments in this thread (${cs.length})</div>${cs.length?roots.map(node).join(''):'<p class="note">You didn\'t comment on this post.</p>'}</div>`+
+    (vs.length?`<div class="card cmts"><div class="meta">Your votes on other people's comments here (${vs.length})</div><div class="vl">${vs.map(v=>`<a href="${esc(safe(v.href))}" target="_blank" rel="noopener noreferrer" title="Open this comment on Reddit"><span class="${v.dir} on">${ic(v.dir)}</span>comment ${esc(v.id)}</a>`).join('')}</div></div>`:'');
+}
+function convView(title,sub,msgs){
+  main.innerHTML=`<div class="card hd"><button class="lnk" data-back>← Back</button><h2>${esc(title)} <small>${esc(sub)}</small></h2></div><div class="card conv">${msgs.map(m=>`<div class="bub${isMe(m.from)?' me':''}"><div class="bm">${esc(m.from)} • ${when(m.ts,m.d)}</div>${m.subject&&!/^re: /i.test(m.subject)?`<b>${esc(m.subject)}</b>`:''}${md(m.body)}</div>`).join('')}</div>`;
+}
+function commView(){
+  const all=[...SUBS.values()].sort((a,b)=>b.posts+b.cmts-a.posts-a.cmts||b.up+b.down-a.up-a.down||a.name.localeCompare(b.name));
+  const cc=s=>`<a class="card comm" href="#/r/${enc(s.name)}">${subIcon(s.name,'md')}<div><b>${esc(subName(s.name))}</b><div class="note">${[s.posts&&s.posts+' posts',s.cmts&&s.cmts+' comments',s.up&&s.up+' upvotes'].filter(Boolean).join(' · ')||'No activity'}</div><div class="meta">${s.sub?'<span class="tag">Joined</span>':''}${s.mod?'<span class="tag mod">Mod</span>':''}${s.ok?'<span class="tag">Approved</span>':''}</div></div></a>`;
+  const ks=[['All',()=>1],['Joined',s=>s.sub],['Moderating',s=>s.mod],['Active in',s=>s.posts+s.cmts]];let k=0,f='';
+  main.innerHTML=`<div class="card hd"><h2>Communities <small>${all.length}</small></h2><div class="tabs">${ks.map((x,i)=>`<button class="pill${i?'':' on'}" data-k="${i}">${x[0]} ${all.filter(x[1]).length}</button>`).join('')}</div><input class="flt" type="search" placeholder="Filter…" aria-label="Filter"></div><div class="grid" id="cg"></div>`+
+    (MULTI.length?`<h4 class="gh">Custom feeds</h4><div class="grid">${MULTI.map(m=>`<div class="card box"><b>${esc(m.name)}</b> <span class="tag">${esc(m.privacy)}</span><div class="note">${esc(m.desc||'')}</div><div class="meta">${m.subs.map(s=>subLink(s)).join(' ')}</div></div>`).join('')}</div>`:'');
+  const draw=()=>{const a=all.filter(ks[k][1]).filter(s=>s.name.toLowerCase().includes(f));$('#cg').innerHTML=a.map(cc).join('')||'<div class="note">None.</div>'};
+  $('.hd',main).addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;$$('.pill',main).forEach(x=>x.classList.toggle('on',x==b));k=+b.dataset.k;draw()});
+  $('.flt',main).addEventListener('input',e=>{f=e.target.value.toLowerCase().trim();draw()});
+  draw();
+}
+
+/* ---------- insights ---------- */
+const STOP=new Set(("the a an and or but if of to in on at for with from by as is are was were be been being it its it's this that these those i i'm i've i'd me my mine we our you your you're he she they them their theirs his her what which who whom how why when where there here not no yes so do does did done doing have has had having just like can could would should will also than then too very really get got go going one two only even much many more most some any all other such own same because while after before again once each few both through during above below off over under up down out into about us am may might must need via etc im ive id dont doesnt didnt cant wont isnt arent wasnt thats theres youre theyre lot thing things way make made know think want see use used still now well back new good").split(' '));
+const NF=n=>n.toLocaleString(),PC=(a,b)=>b?Math.round(a/b*100)+'%':'—',CN=n=>n>=1e4?Math.round(n/1e3)+'K':n>=1e3?(n/1e3).toFixed(1).replace(/\.0$/,'')+'K':''+n;
+const DAY=t=>t?new Date(t).toLocaleDateString([],{year:'numeric',month:'short',day:'numeric'}):'—';
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const tally=a=>{const m=new Map();for(const k of a)if(k)m.set(k,(m.get(k)||0)+1);return[...m].sort((x,y)=>y[1]-x[1])};
+// one-series ranked bars; h is always an internal href built here
+const bars=(rows,unit='')=>rows.length?`<div class="bl">${rows.map(([l,v,h])=>{const m=rows[0][1]||1;return`<span class="l" title="${esc(l)}">${h?`<a href="${h}">${esc(l)}</a>`:esc(l)}</span><span class="bt" data-tip="${esc(l)}: ${NF(v)}${unit}"><i style="width:${(v/m*100).toFixed(1)}%"></i></span><span class="v">${NF(v)}${unit}</span>`}).join('')}</div>`:'<p class="note">No data.</p>';
+const split=(u,d)=>`<div class="sb" data-tip="${NF(u)} up (${PC(u,u+d)}) · ${NF(d)} down (${PC(d,u+d)})">${u?`<i style="flex:${u};background:var(--c-up)"></i>`:''}${d?`<i style="flex:${d};background:var(--c-down)"></i>`:''}</div>`;
+const UDLG='<div class="lg"><span><i style="background:var(--c-up)"></i>Upvotes</span><span><i style="background:var(--c-down)"></i>Downvotes</span></div>';
+const tile=(l,v,s)=>`<div class="card tile"><small>${l}</small><b>${v}</b><small>${s||'&nbsp;'}</small></div>`;
+const sec=(t,n,b,w)=>`<section class="card sec${w?' wide':''}"><h3>${t}</h3><p class="note">${n}</p>${b}</section>`;
+const facts=r=>`<dl class="facts">${r.filter(Boolean).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+const first=rows=>rows.map(r=>Object.values(r).find(Boolean)).find(Boolean)||'';
+async function insightsView(){
+  const tok=RT;main.innerHTML='<div class="card empty">Crunching the numbers…</div>';
+  const X={};await Promise.all([...F.keys()].map(async k=>{try{X[k]=await tab(k)}catch(e){X[k]={h:[],a:[]}}}));
+  if(tok!==RT)return;
+  const R=k=>X[k]?objs(X[k]):[];
+  const A=[...P,...C].filter(x=>x.ts),ts=A.map(x=>x.ts).sort((a,b)=>a-b),reg=pdate((STAT.find(([k])=>/regist|created/i.test(k))||[])[1]);
+  // calendar
+  const dn=t=>Math.floor((t-new Date(t).getTimezoneOffset()*6e4)/864e5),DC=new Map();A.forEach(x=>{const k=dn(x.ts);DC.set(k,(DC.get(k)||0)+1)});
+  const days=[...DC.keys()].sort((a,b)=>a-b);let streak=0,run=0,prev=-9;for(const d of days){run=d==prev+1?run+1:1;if(run>streak)streak=run;prev=d}
+  const bd=[...DC].sort((a,b)=>b[1]-a[1])[0];
+  const HM=Array.from({length:7},()=>Array(24).fill(0));A.forEach(x=>{const d=new Date(x.ts);HM[(d.getDay()+6)%7][d.getHours()]++});
+  const WD=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],hrs=[...Array(24)].map((_,h)=>sum(HM.map(r=>r[h]))),dys=HM.map(sum);
+  const ph=hrs.indexOf(Math.max(...hrs)),pd=dys.indexOf(Math.max(...dys)),hm=Math.max(1,...HM.flat()),lv=v=>v?Math.min(5,1+Math.floor(v/hm*4.999)):0;
+  const yr=new Map();A.forEach(x=>{const y=new Date(x.ts).getFullYear(),o=yr.get(y)||yr.set(y,{p:0,c:0}).get(y);x.k=='post'?o.p++:o.c++});
+  const Y=[];if(yr.size){const ks=[...yr.keys()];for(let y=Math.min(...ks);y<=Math.max(...ks);y++)Y.push([y,yr.get(y)||{p:0,c:0}])}
+  const ym=Math.max(1,...Y.map(([,o])=>o.p+o.c)),short=Y.length>10;
+  // communities and votes
+  const subs=[...SUBS.values()],act=subs.filter(s=>s.posts+s.cmts).sort((a,b)=>b.posts+b.cmts-a.posts-a.cmts),joined=subs.filter(s=>s.sub);
+  const vsub=subs.filter(s=>s.up+s.down>=10),vtop=subs.filter(s=>s.up+s.down).sort((a,b)=>b.up+b.down-a.up-a.down).slice(0,8);
+  const pos=vsub.slice().sort((a,b)=>b.up/(b.up+b.down)-a.up/(a.up+a.down)||b.up-a.up)[0],neg=vsub.slice().sort((a,b)=>b.down/(b.up+b.down)-a.down/(a.up+a.down)||b.down-a.down)[0];
+  const nv=UP.length+DN.length,pv=x=>x.kind=='post';
+  // writing
+  const wc=s=>(strip(s).match(/\S+/g)||[]).length,cw=C.map(c=>wc(c.body)),pw=P.map(p=>wc(p.title)+wc(p.body)),words=sum(cw)+sum(pw);
+  const med=cw.slice().sort((a,b)=>a-b)[cw.length>>1]||0,li=cw.indexOf(Math.max(0,...cw)),lc=C[li];
+  const wf=new Map(),em=new Map();
+  for(const s of[...P.map(p=>p.title+' '+p.body),...C.map(c=>c.body)]){const t=dent(s).toLowerCase().replace(/https?:\/\/\S+/g,' ');
+    for(const w of t.match(/[a-z][a-z']{2,}/g)||[]){const x=w.replace(/'/g,'');if(!STOP.has(w)&&!STOP.has(x))wf.set(x,(wf.get(x)||0)+1)}
+    for(const e of t.match(/\p{Extended_Pictographic}/gu)||[])em.set(e,(em.get(e)||0)+1)}
+  const tw=[...wf].sort((a,b)=>b[1]-a[1]).slice(0,30),te=[...em].sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const ptype=p=>{const u=p.url||'';if(!u||u[0]=='/'||/\/comments\//.test(u))return'Text';if(/v\.redd\.it|youtu\.?be|\.mp4|\.gifv/i.test(u))return'Video';if(/\/gallery\//.test(u))return'Gallery';return isImg(u)?'Image':'Link'};
+  const doms=tally([...P.filter(p=>/^https?:/.test(p.url)&&ptype(p)=='Link').map(p=>host(p.url)),...C.flatMap(c=>(dent(c.body).match(/https?:\/\/[^\s)\]>"]+/g)||[]).map(host))]).slice(0,8);
+  // conversations
+  const sent=MS.filter(m=>isMe(m.from)).length,corr=tally(MS.map(m=>isMe(m.from)?m.to:m.from).filter(x=>x&&!isMe(x))).slice(0,6);
+  const cms=CHAT.flatMap(c=>c.msgs),csent=cms.filter(m=>isMe(m.from)).length;
+  // money and privacy
+  const spend=new Map();R('purchases').forEach(r=>{const c=(r.currency||'').toUpperCase()||'?',v=parseFloat(r.cost);if(!isNaN(v))spend.set(c,(spend.get(c)||0)+v)});
+  const ips=R('ip_logs'),uip=tally(ips.map(r=>r.ip)),it=ips.map(r=>pdate(r.date)).filter(Boolean).sort((a,b)=>a-b);
+  const idp=R('linked_identities').map(r=>host(r.issuer_id||'')).filter(Boolean),phone=R('linked_phone_number').some(r=>Object.values(r).some(Boolean));
+  const ia=R('inferred_age')[0]||{},bday=R('birthdate')[0]||{},sap=R('sensitive_ads_preferences');
+  const rows=[...F.keys()].map(k=>[F.get(k).name,X[k]?X[k].a.length:0,'#/data/'+enc(k)]).sort((a,b)=>b[1]-a[1]),tr=sum(rows.map(r=>r[1])),tsz=sum([...F.values()].map(f=>f.size));
+  const own=C.filter(c=>PID.has(c.pid)).length,self=C.filter(c=>c.parent&&CID.has(c.parent)).length,gild=sum(P.map(p=>p.gild))+sum(C.map(c=>c.gild));
+  const yrs=reg?(Date.now()-reg)/31557600000:0;
+  main.innerHTML=`<div class="card hd"><h2>Insights <small>from ${F.size} files</small></h2><span class="note">Times are in your local time zone.</span></div>`+
+  `<div class="tiles">`+
+    tile('Account age',reg?yrs.toFixed(1)+' yrs':'—',reg?'joined '+DAY(reg):'')+
+    tile('Posts &amp; comments',NF(A.length),ts.length?'since '+new Date(ts[0]).getFullYear():'')+
+    tile('Votes cast',NF(nv),nv?PC(UP.length,nv)+' upvotes':'')+
+    tile('Words written',NF(words),C.length?'~'+NF(Math.round(sum(cw)/C.length))+' per comment':'')+
+    tile('Active days',NF(days.length),streak?'longest streak '+streak+' day'+(streak>1?'s':''):'')+
+    tile('Communities',NF(joined.length)+' joined',act.length?'active in '+NF(act.length):'')+
+  `</div><div class="ins">`+
+  sec('Activity by year','Your posts and comments per year. Hover a column for the split.',Y.length?`<div class="cols">${Y.map(([y,o])=>`<div class="col" data-tip="${y}: ${NF(o.p)} posts, ${NF(o.c)} comments"><span>${CN(o.p+o.c)}</span><i style="height:${Math.round((o.p+o.c)/ym*120)}px"></i></div>`).join('')}</div><div class="cx">${Y.map(([y])=>`<span>${short?"'"+String(y).slice(2):y}</span>`).join('')}</div>`+facts([['First post or comment',DAY(ts[0])],['Most recent',DAY(ts[ts.length-1])],bd&&['Busiest day',`${new Date(bd[0]*864e5).toLocaleDateString([],{timeZone:'UTC',year:'numeric',month:'short',day:'numeric'})} (${NF(bd[1])})`]]):'<p class="note">No dated posts or comments.</p>',1)+
+  sec('When you post','Posts and comments by weekday and hour.',A.length?`<div class="hm"><span></span>${hrs.map((_,h)=>`<span>${h%6?'':h}</span>`).join('')}${HM.map((r,d)=>`<span>${WD[d]}</span>`+r.map((v,h)=>`<i class="l${lv(v)}" data-tip="${WD[d]} ${String(h).padStart(2,'0')}:00 · ${NF(v)}"></i>`).join('')).join('')}</div><div class="lg">Less ${[0,1,2,3,4,5].map(l=>`<i class="hmk l${l}"></i>`).join('')} More</div>`+facts([['Peak hour',`${String(ph).padStart(2,'0')}:00 (${PC(hrs[ph],A.length)})`],['Busiest weekday',`${WD[pd]} (${PC(dys[pd],A.length)})`],['Night owl (00:00–06:00)',PC(sum(hrs.slice(0,6)),A.length)],['Weekends',PC(dys[5]+dys[6],A.length)]]):'<p class="note">No data.</p>',1)+
+  sec('Top communities','Where your posts and comments went.',bars(act.slice(0,10).map(s=>[subName(s.name),s.posts+s.cmts,'#/r/'+enc(s.name)]))+facts([act[0]&&['Share in top community',PC(act[0].posts+act[0].cmts,A.length)],joined.length&&['Joined but never posted',`${NF(joined.filter(s=>!(s.posts+s.cmts)).length)} (${PC(joined.filter(s=>!(s.posts+s.cmts)).length,joined.length)})`],['Moderator of',NF(subs.filter(s=>s.mod).length)]]))+
+  sec('How you vote','Votes you cast. Reddit\'s export has no scores for your own posts.',nv?UDLG+split(UP.length,DN.length)+`<h5>Most-voted communities</h5><div class="bl">${vtop.map(s=>`<span class="l"><a href="#/r/${enc(s.name)}">${esc(subName(s.name))}</a></span>${split(s.up,s.down)}<span class="v">${PC(s.up,s.up+s.down)} up</span>`).join('')}</div>`+facts([['Upvotes',`${NF(UP.length)} (${NF(UP.filter(pv).length)} posts, ${NF(UP.length-UP.filter(pv).length)} comments)`],['Downvotes',`${NF(DN.length)} (${NF(DN.filter(pv).length)} posts, ${NF(DN.length-DN.filter(pv).length)} comments)`],pos&&['Friendliest community',`${esc(subName(pos.name))} (${PC(pos.up,pos.up+pos.down)} up)`],neg&&neg.down&&['Most downvoted',`${esc(subName(neg.name))} (${PC(neg.down,neg.up+neg.down)} down)`]]):'<p class="note">No votes in this export.</p>')+
+  sec('How you write','Based on the text of your posts and comments.',facts([['Average comment',NF(C.length?Math.round(sum(cw)/C.length):0)+' words'],['Median comment',NF(med)+' words'],lc&&['Longest comment',`<a href="#/post/${enc(lc.pid)}">${NF(cw[li])} words</a>`],['Comments on your own posts',`${NF(own)} (${PC(own,C.length)})`],['Replies to yourself',NF(self)],['Post titles that ask a question',PC(P.filter(p=>/\?\s*$/.test(p.title)).length,P.length)]])+`<h5>Words you use most</h5><div class="chips">${tw.map(([w,n])=>`<span>${esc(w)}<b>${NF(n)}</b></span>`).join('')||'<span class="note">None</span>'}</div>`+(te.length?`<h5>Favourite emoji</h5><div class="chips">${te.map(([e,n])=>`<span>${esc(e)}<b>${NF(n)}</b></span>`).join('')}</div>`:''))+
+  sec('What you post','Your posts by type, and the sites you link to most.',bars(tally(P.map(ptype)))+`<h5>Most linked sites</h5>`+bars(doms))+
+  sec('Conversations','Private messages and chat.',facts([['Messages sent',`${NF(sent)} (${PC(sent,MS.length)})`],['Messages received',NF(MS.length-sent)],['Conversations',NF(THR.length)],['Chat messages sent',`${NF(csent)} of ${NF(cms.length)} (${PC(csent,cms.length)})`],['Chat channels',NF(CHAT.length)],ANN.length&&['Announcements read',PC(ANN.filter(a=>a.read).length,ANN.length)]])+(corr.length?`<h5>Top correspondents</h5>`+bars(corr):''))+
+  sec('Saved, awards &amp; money','What you kept, gave and paid for.',facts([['Saved',`${NF(SV.length)} (${NF(SV.filter(pv).length)} posts, ${NF(SV.length-SV.filter(pv).length)} comments)`],['Hidden posts',NF(HID.length)],['Drafts / scheduled',`${NF(DR.length)} / ${NF(SCH.length)}`],['Awards given',NF(AW.filter(a=>!a.got).length)],['Awards received',NF(AW.filter(a=>a.got).length+gild)],...[...spend].map(([c,v])=>['Spent ('+esc(c)+')',v.toFixed(2)]),R('subscriptions').length&&['Subscriptions',esc(R('subscriptions').map(r=>r.product_name||r.product).filter(Boolean).join(', '))]])+(SV.length?`<h5>Most saved from</h5>`+bars(tally(SV.map(x=>x.sub)).slice(0,5).map(([s,n])=>[subName(s),n,'#/r/'+enc(s)])):''))+
+  sec('Privacy footprint','What Reddit recorded or inferred about you. Turn on Private info to reveal identifiers.',facts([['Logged sign-ins (IP records)',NF(ips.length)],['Distinct IP addresses',NF(uip.length)],uip[0]&&['Most used IP',`${O.sens?esc(uip[0][0]):mask} (${NF(uip[0][1])}×)`],it.length&&['IP records span',`${DAY(it[0])} – ${DAY(it[it.length-1])}`],['Linked sign-in providers',idp.length?esc(idp.join(', ')):'None'],['Phone number linked',phone?'Yes':'No'],['Birthdate on file',bday.birthdate?(O.sens?esc(bday.birthdate):'Yes'):'No'],['Account gender',esc(first(R('account_gender'))||'—')],['Ads: inferred age',esc(first(R('inferred_age_ads'))||ia.persona_estimated_age||'—')],['Ads: inferred gender',esc(first(R('inferred_gender_ads'))||'—')],ia.under_18&&['Flagged under 18',esc(ia.under_18)],['Saved preferences',NF(R('user_preferences').length)],['Friends',NF(R('friends').length)]])+(sap.length?`<h5>Sensitive ad categories</h5>${facts(sap.map(r=>[esc(r.type),esc(r.preference)]))}`:''))+
+  sec('Your data','The files in this export, by number of rows.',bars(rows.slice(0,10))+facts([['Files',NF(F.size)],['Rows',NF(tr)],['Size',kb(tsz)]]),1)+
+  `</div>`;
+}
+
+const GROUPS=[['Activity',['posts','post_headers','comments','comment_headers','post_votes','comment_votes','saved_posts','saved_comments','hidden_posts','drafts','scheduled_posts','poll_votes']],['Messages',['messages_archive','messages_archive_headers','chat_history','announcements']],['Communities & people',['subscribed_subreddits','moderated_subreddits','approved_submitter_subreddits','multireddits','friends']],['Awards & payments',['gilded_content','gold_received','purchases','subscriptions','payouts','stripe']],['Account & privacy',['statistics','user_preferences','ip_logs','linked_identities','linked_phone_number','birthdate','persona','account_gender']],['Ads & inferences',['inferred_age','inferred_age_ads','inferred_gender_ads','sensitive_ads_preferences']]];
+function dataView(){
+  const used=new Set(),gs=GROUPS.map(([g,ks])=>[g,ks.filter(k=>F.has(k)&&used.add(k))]),rest=[...F.keys()].filter(k=>!used.has(k)).sort();
+  if(rest.length)gs.push(['Other',rest]);
+  main.innerHTML=`<div class="card hd"><h2>Account data <small>${F.size} files</small></h2>${F.has('checkfile')&&crypto.subtle?'<button class="pill" id="vfy">Verify checksums</button>':''}</div>`+
+    gs.filter(g=>g[1].length).map(([g,ks])=>`<h4 class="gh">${g}</h4><div class="grid">${ks.map(k=>`<a class="card file" href="#/data/${enc(k)}" data-f="${esc(k)}"><b>${esc(F.get(k).name)}</b><span class="note"><span class="rc">${kb(F.get(k).size)}</span> <span class="vf"></span></span></a>`).join('')}</div>`).join('');
+  const el=(k,s)=>main.querySelector(`[data-f="${CSS.escape(k)}"] ${s}`);
+  for(const k of F.keys())tab(k).then(t=>{const e=el(k,'.rc');if(e)e.textContent=t.a.length.toLocaleString()+' rows · '+kb(F.get(k).size)}).catch(()=>{});
+  $('#vfy')?.addEventListener('click',async e=>{
+    const b=e.target;b.disabled=true;b.textContent='Verifying…';let ok=0,bad=0;
+    try{
+      for(const r of objs(await tab('checkfile'))){
+        const k=(r.filename||'').split('/').pop().replace(/\.csv$/i,'').toLowerCase(),f=F.get(k);if(!f)continue;
+        const hx=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await f.read()))].map(x=>x.toString(16).padStart(2,'0')).join(''),g=hx==(r.sha256||'').trim().toLowerCase();
+        g?ok++:bad++;const v=el(k,'.vf');if(v)v.innerHTML=g?'· <b style="color:#46d160">✓ verified</b>':'· <b class="err">✗ mismatch</b>';
+      }
+      b.textContent=`${ok} verified${bad?`, ${bad} mismatched`:''}`;
+    }catch(x){b.textContent='Verification failed';console.error(x)}
+  });
+}
+async function tableView(k){
+  const f=F.get(k);if(!f)return notFound();
+  main.innerHTML=`<div class="card hd"><button class="lnk" data-back>← Back</button><h2>${esc(f.name)} <small></small></h2><input class="flt" type="search" placeholder="Filter rows…" aria-label="Filter rows"></div><div class="card tw" id="tbl"><div class="empty">Loading…</div></div>`;
+  const tok=RT;let t;try{t=await tab(k)}catch(e){if(tok===RT)$('#tbl').innerHTML=`<div class="empty err">${esc(e.message)}</div>`;return}
+  if(tok!==RT)return;
+  const kvs=/^(statistic|preference)$/.test(t.h[0]),sc=t.h.map(h=>SENSC.test(h));
+  let col=-1,dir=1,lim=200,flt='';
+  const cell=(v,s)=>!v?'':s&&!O.sens?mask:safe(v)&&/^https?:/i.test(v)?`<a href="${esc(v)}" target="_blank" rel="noopener noreferrer">${esc(v)}</a>`:esc(v);
+  const cmp=(a,b)=>(a=a??'',b=b??'',a!==''&&b!==''&&!isNaN(a)&&!isNaN(b)?a-b:a.localeCompare(b));
+  const draw=()=>{
+    // masked columns are left out of the filter so it can't be used to probe them
+    let a=t.a;if(flt)a=a.filter(r=>r.filter((_,i)=>O.sens||!(sc[i]||(kvs&&i==1&&SENSK.test(r[0])))).join('\u0001').toLowerCase().includes(flt));if(col>=0)a=a.slice().sort((x,y)=>cmp(x[col],y[col])*dir);
+    $('.hd small',main).textContent=a.length.toLocaleString()+' rows';
+    $('#tbl').innerHTML=t.a.length?`<table class="dt"><thead><tr>${t.h.map((h,i)=>`<th data-c="${i}">${esc(h)}${i==col?(dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${a.slice(0,lim).map(r=>'<tr>'+t.h.map((_,i)=>`<td>${cell(r[i],sc[i]||(kvs&&i==1&&SENSK.test(r[0])))}</td>`).join('')+'</tr>').join('')}</tbody></table>${a.length>lim?`<button class="pill pad" id="tmore">Show more (${(a.length-lim).toLocaleString()} left)</button>`:''}`:`<div class="empty">This file only has a header row (${esc(t.h.join(', '))}).</div>`;
+  };
+  $('#tbl').addEventListener('click',e=>{const th=e.target.closest('th');if(th){const c=+th.dataset.c;dir=c==col?-dir:1;col=c;draw()}else if(e.target.id=='tmore'){lim+=500;draw()}else{const td=e.target.closest('td');if(td&&!e.target.closest('a'))td.classList.toggle('open')}});
+  let tm;$('.flt',main).addEventListener('input',e=>{clearTimeout(tm);tm=setTimeout(()=>{flt=e.target.value.toLowerCase().trim();lim=200;draw()},150)});
+  draw();
+}
+function notFound(){main.innerHTML='<div class="card empty">Nothing here. <a href="#/">Go to overview</a></div>'}
+
+/* ---------- shell ---------- */
+const NAV=()=>[['','home','Overview',P.length+C.length],['insights','chart','Insights',null],['posts','post','Posts',P.length],['comments','cmt','Comments',C.length],['saved','save','Saved',SV.length],['upvoted','up','Upvoted',UP.length],['downvoted','down','Downvoted',DN.length],['hidden','hide','Hidden',HID.length],['drafts','draft','Drafts',DR.length],['scheduled','clock','Scheduled',SCH.length],'Inbox',['messages','mail','Messages',THR.length],['chat','chat','Chat',CHAT.length],['announcements','bell','Announcements',ANN.length],'More',['communities','grid','Communities',SUBS.size],['awards','award','Awards',AW.length],['data','db','Account data',F.size]];
+function renderNav(){$('#nav').innerHTML=NAV().map(x=>typeof x=='string'?`<h4>${x}</h4>`:`<a href="#/${x[0]}" data-r="${x[0]}"${x[3]===0?' class="zero"':''}>${ic(x[1])}<span>${x[2]}</span>${x[3]==null?'':`<b>${x[3].toLocaleString()}</b>`}</a>`).join('')}
+function renderSide(){
+  const top=[...SUBS.values()].filter(s=>s.posts+s.cmts).sort((a,b)=>b.posts+b.cmts-a.posts-a.cmts).slice(0,8);
+  $('#side').innerHTML=`<div class="card prof"><div class="pbn"></div><div class="pav">${esc((ME[0]||'?').toUpperCase())}</div><h3>u/${esc(ME)}</h3><div class="stats">${[['Posts',P.length,'posts'],['Comments',C.length,'comments'],['Upvotes',UP.length,'upvoted'],['Downvotes',DN.length,'downvoted'],['Saved',SV.length,'saved'],['Messages',MS.length,'messages']].map(([l,n,r])=>`<a href="#/${r}"><b>${n.toLocaleString()}</b>${l}</a>`).join('')}</div>`+
+    (STAT.length?`<dl class="kv">${STAT.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${SENSK.test(k)&&!O.sens?mask:esc(v)}</dd>`).join('')}</dl>`:'')+`</div>`+
+    (top.length?`<div class="card box"><h4>Most active in</h4>${top.map(s=>`<a class="srow" href="#/r/${enc(s.name)}">${subIcon(s.name)}<span>${esc(subName(s.name))}</span><small>${s.posts+s.cmts}</small></a>`).join('')}</div>`:'')+
+    `<div class="card box note">Reddit Export Viewer v${VERSION}. Read locally from ${F.size} files. Nothing is uploaded. Remote media is <b>${O.media?'on':'off'}</b>.</div>`;
+}
+function toggles(){
+  const m=$('#tmed'),s=$('#tsen');
+  m.innerHTML=ic('img')+`<span>Media ${O.media?'on':'off'}</span>`;m.classList.toggle('on',O.media);m.setAttribute('aria-pressed',O.media);
+  s.innerHTML=ic(O.sens?'eye':'hide')+'<span>Private info</span>';s.classList.toggle('on',O.sens);s.setAttribute('aria-pressed',O.sens);
+}
+function route(){
+  POS[cur]=scrollY;cur=location.hash;RT++;HOPS++;io&&io.disconnect();tip.hidden=true;
+  const[path,qs]=location.hash.replace(/^#\/?/,'').split('?'),q=new URLSearchParams(qs||''),s=path.split('/').map(x=>{try{return decodeURIComponent(x)}catch(e){return x}}),a=s[0]||'';
+  const nk={post:'',r:'communities',msg:'messages',search:'-'}[a]??a;
+  $$('#nav a').forEach(e=>e.classList.toggle('act',e.dataset.r===nk));
+  $('#q').value=a=='search'?q.get('q')||'':'';
+  const L=(title,items,o={})=>list({title,items,...o});
+  switch(a){
+    case'':L('Overview',[...P,...C],{kinds:K_PC});break;
+    case'insights':insightsView();break;
+    case'posts':L('Posts',P);break;
+    case'comments':L('Comments',C);break;
+    case'saved':L('Saved',SV,{dated:false,kinds:K_REF});break;
+    case'upvoted':L('Upvoted',UP,{dated:false,kinds:K_REF});break;
+    case'downvoted':L('Downvoted',DN,{dated:false,kinds:K_REF});break;
+    case'hidden':L('Hidden',HID,{dated:false});break;
+    case'drafts':L('Drafts',DR);break;
+    case'scheduled':L('Scheduled',SCH);break;
+    case'messages':L('Messages',THR,{empty:'No private messages in this export.'});break;
+    case'msg':{const t=THR.find(t=>t.id==s[1]);t?convView(t.subject,'with '+t.who,t.msgs):notFound();break}
+    case'chat':if(s[1]){const c=CHAT.find(c=>c.id==s[1]);c?convView(c.name,c.type,c.msgs):notFound()}else L('Chat',CHAT,{empty:'No chat history in this export.'});break;
+    case'announcements':L('Announcements',ANN);break;
+    case'awards':L('Awards',AW,{kinds:[['All',()=>1],['Given',x=>!x.got],['Received',x=>x.got]]});break;
+    case'communities':commView();break;
+    case'r':subView(s[1]||'');break;
+    case'post':postView(s[1]);break;
+    case'search':L('Search',[...P,...C,...MS,...DR,...SCH,...ANN,...UP,...DN,...SV,...HID],{q:q.get('q')||'',kinds:[['All',()=>1],['Posts',x=>x.k=='post'],['Comments',x=>x.k=='cmt'],['Messages',x=>x.k=='msg'||x.k=='ann'],['Votes & saved',x=>x.k=='ref'],['Drafts',x=>x.k=='draft'||x.k=='sched']]});break;
+    case'data':s[1]?tableView(s[1]):dataView();break;
+    default:notFound();
+  }
+  scrollTo(0,POS[cur]||0);
+}
+
+/* ---------- events ---------- */
+const drop=$('#drop'),tip=document.createElement('div');tip.id='tip';tip.hidden=true;document.body.append(tip);
+document.addEventListener('dragover',e=>{e.preventDefault();if(!$('#land').hidden)drop.classList.add('over')});
+document.addEventListener('dragleave',e=>{if(!e.relatedTarget)drop.classList.remove('over')});
+document.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');if(!$('#land').hidden)ingest(dropped(e.dataTransfer))});
+$('#fdir').onchange=e=>ingest([...e.target.files]);
+$('#fzip').onchange=e=>ingest([...e.target.files]);
+$('#sf').onsubmit=e=>{e.preventDefault();location.hash='#/search?q='+enc($('#q').value.trim())};
+$('#tmed').onclick=()=>{O.media=!O.media;LS.set('media',O.media);toggles();renderSide();route()};
+$('#tsen').onclick=()=>{O.sens=!O.sens;toggles();renderSide();route()};
+$('#tthe').onclick=()=>{const d=document.documentElement,c=d.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=c=='dark'?'light':'dark';d.dataset.theme=n;LS.set('theme',n)};
+$('#tcls').onclick=()=>{location.hash='';location.reload()};
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.smore,.mbox,.sp,[data-back]');if(!b)return;
+  if(b.matches('.smore')){b.previousElementSibling.classList.remove('clamp');b.remove()}
+  else if(b.matches('.mbox')){if(isImg(b.dataset.src))b.outerHTML=`<img class="media" referrerpolicy="no-referrer" src="${esc(b.dataset.src)}" alt="">`}
+  else if(b.matches('.sp'))b.classList.toggle('open');
+  else HOPS>1?history.back():location.hash='#/';
+});
+document.addEventListener('error',e=>{if(e.target.tagName=='IMG')e.target.classList.add('bad')},true);
+document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t){tip.textContent=t.dataset.tip;tip.hidden=false}else tip.hidden=true});
+document.addEventListener('mousemove',e=>{if(!tip.hidden){tip.style.left=Math.max(8,Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8))+'px';tip.style.top=(e.clientY+16)+'px'}});
+</script>
+</body>
+</html>
