@@ -15,7 +15,7 @@ Reddit Export Viewer handles personal data, so it's built to keep that data on y
 
 ## Reporting a problem
 
-If you find a way for exported data to run code, leave the browser, or bypass the masking, please open an issue. Describe the problem without including any real export data.
+If you find a way for exported data to run code, leave the browser, or bypass the masking, please report it privately: go to this repo's **Security** tab and click **Report a vulnerability**. Describe the problem without including any real export data.
 
 ## Disclaimer
 
