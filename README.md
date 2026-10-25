@@ -5,6 +5,9 @@ Reddit gives you your data as a pile of `.csv` files. This turns them into a fam
 
 One HTML file · no dependencies · no build step · nothing is uploaded
 
+<img width="2502" height="1706" alt="Screenshot From 2026-10-25 22-18-36" src="https://github.com/user-attachments/assets/ccc4e979-a828-4ccd-a803-5e87f380cf8b" />
+
+
 > **Disclaimer**
 > For 100% transparency: I made this with [Claude Code](https://claude.com/claude-code). It is for personal use, but I have uploaded it here to share with the world (and off world) and anyone who wants to use it. I take no responsibility for its use, and you use it at your own risk.
 
