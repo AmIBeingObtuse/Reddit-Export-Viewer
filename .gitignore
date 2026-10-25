@@ -1,0 +1,9 @@
+# Never commit real Reddit exports
+*.zip
+*.csv
+export*/
+reddit-data*/
+
+# OS clutter
+.DS_Store
+Thumbs.db
